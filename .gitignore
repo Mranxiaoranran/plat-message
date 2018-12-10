@@ -1,2 +1,4 @@
 .idea/
 plat-message.iml
+target/
+client/

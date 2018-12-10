@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <link href="bootstrap.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 20px;
+        }
+
+        .console {
+            height: 400px;
+            overflow: auto;
+        }
+
+        .username-msg {
+            color: orange;
+        }
+
+        .connect-msg {
+            color: green;
+        }
+
+        .disconnect-msg {
+            color: red;
+        }
+
+        .send-msg {
+            color: #888
+        }
+    </style>
+
+    <script src="js/socket.io/socket.io.js"></script>
+    <script src="js/moment.min.js"></script>
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script>
+
+
+        var chatSocket = io.connect('http://localhost:9092?clientId=a');
+
+
+
+
+
+
+
+
+    </script>
+
+
+</head>
+
+<body>
+<h1>Namespaces demo chat</h1>
+<br/>
+
+<div id="chat1" style="width: 49%; float: left;">
+    <h4>chat1</h4>
+    <div class="console well"></div>
+    <form class="well form-inline" onsubmit="return false;">
+        <input id="message" class="msg input-xlarge" type="text" placeholder="Type something..."/>
+        <button type="button" onClick="sendMessageA()" class="btn" id="send">Send</button>
+        <button type="button" onClick="connectA()" class="btn">connect</button>
+    </form>
+</div>
+
+
+</body>
+</html>
