@@ -7,6 +7,7 @@ import com.corundumstudio.socketio.annotation.OnDisconnect;
 import io.netty.util.internal.StringUtil;
 import message.client.ClientDo;
 import message.session.StoreBas;
+import message.user.UserDO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -55,6 +56,10 @@ public class Connector {
         //将会话信息更新保存至集合中
         StoreBas.CLIENTS.put(clientId, clientDo);
         StoreBas.CONNECTIONS.put(session, clientId);
+        //设置客户信息
+        UserDO userDO = new UserDO();
+        userDO.setUserId(clientId);
+        StoreBas.USERS.add(userDO);
     }
 
 
