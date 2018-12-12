@@ -1,6 +1,9 @@
 package message.message;
 
-public class MessageDO{
+/**
+ * 发送消息
+ */
+public class SendMessageDO {
 
     /**
      * 聊天内容
@@ -13,7 +16,7 @@ public class MessageDO{
     private String sendUser;
 
     /**
-     * 接受用户
+     * 接收用户
      */
     private String toUser;
 

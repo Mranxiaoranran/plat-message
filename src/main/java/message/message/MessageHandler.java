@@ -30,18 +30,18 @@ public class MessageHandler {
      *
      * @param client
      * @param request
-     * @param messageDO
+     * @param
      */
     @OnEvent(value = "message")
-    public void onEvent(SocketIOClient client, AckRequest request, MessageDO messageDO) {
-        ClientDo clientDo = StoreBas.CLIENTS.get(messageDO.getToUser());
+    public void onEvent(SocketIOClient client, AckRequest request, SendMessageDO sendMessageDO) {
+        ClientDo clientDo = StoreBas.CLIENTS.get(sendMessageDO.getToUser());
         if (clientDo != null && clientDo.isOnline()) {
             UUID target = clientDo.getSession();
             System.out.println("目标会话UUID:" + target);
             // 向当前会话发送信息
-            client.sendEvent("message", messageDO);
+            client.sendEvent("message", sendMessageDO);
             // 向目标会话发送信息
-            server.getClient(target).sendEvent("message", messageDO);
+            server.getClient(target).sendEvent("message", new ReceiveMessageDO(sendMessageDO));
         }
     }
 
