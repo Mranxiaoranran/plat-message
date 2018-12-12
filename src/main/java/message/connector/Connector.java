@@ -4,6 +4,7 @@ import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.annotation.OnConnect;
 import com.corundumstudio.socketio.annotation.OnDisconnect;
+import io.netty.util.internal.StringUtil;
 import message.client.ClientDo;
 import message.session.StoreBas;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,6 @@ public class Connector {
     @OnConnect
     public void onConnect(SocketIOClient client) {
         String clientId = client.getHandshakeData().getSingleUrlParam("clientId");
-        System.out.println(" socket连接: " + clientId);
         UUID session = client.getSessionId();
         ClientDo clientDo = StoreBas.CLIENTS.get(clientId);
         // 如果没有连接信息、则新建会话信息
@@ -46,13 +46,15 @@ public class Connector {
             clientDo.setOnline(true);
             //在线数加1
             System.out.println("socket 建立新连接、sessionId:" + session + "、clientId:" + clientId + "、当前连接数：" + onlineCount.incrementAndGet());
+        } else {
+            System.out.println(" socket连接回复: " + clientId);
         }
         // 更新设置客户端连接信息
-        clientDo.setLeastSignificantBits(session.getLeastSignificantBits());
-        clientDo.setMostSignificantBits(session.getMostSignificantBits());
+        clientDo.setSession(session);
         clientDo.setLastConnectedTime(new Date());
         //将会话信息更新保存至集合中
         StoreBas.CLIENTS.put(clientId, clientDo);
+        StoreBas.CONNECTIONS.put(session, clientId);
     }
 
 
@@ -64,9 +66,25 @@ public class Connector {
     @OnDisconnect
     public void onDisconnect(SocketIOClient client) {
         String clientId = client.getHandshakeData().getSingleUrlParam("clientid");
-        StoreBas.CLIENTS.remove(clientId);
-        //在线数减1
-        System.out.println("socket 断开连接、sessionId:" + client.getSessionId() + "、clientId:" + clientId + "、当前连接数：" + onlineCount.decrementAndGet());
+        UUID session = client.getSessionId();
+        //通过非业务方法断开连接
+        if (StringUtil.isNullOrEmpty(clientId)) {
+            //通过连接与客户信息获取用户信息
+            clientId = StoreBas.CONNECTIONS.get(session);
+            if (!StringUtil.isNullOrEmpty(clientId)) {
+                //连接数与客户关系移除
+                StoreBas.CONNECTIONS.remove(session);
+                //通过业务方法断开连接
+                StoreBas.CLIENTS.remove(clientId);
+                //在线数减1
+                System.out.println("socket 断开连接、sessionId:" + client.getSessionId() + "、clientId:" + clientId + "、当前连接数：" + onlineCount.decrementAndGet());
+            }
+        } else {
+            //通过业务方法断开连接
+            StoreBas.CLIENTS.remove(clientId);
+            //在线数减1
+            System.out.println("socket 断开连接、sessionId:" + client.getSessionId() + "、clientId:" + clientId + "、当前连接数：" + onlineCount.decrementAndGet());
+        }
     }
 
 

@@ -1,27 +1,25 @@
-package message.message;
+package message.user;
 
 import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.annotation.OnEvent;
-import com.sun.nio.sctp.MessageInfo;
 import message.client.ClientDo;
+import message.message.MessageDO;
 import message.session.StoreBas;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.UUID;
 
 @Component
-public class MessageHandler {
+public class UserHandler {
 
     //netty服务器核心
     private SocketIOServer server;
 
     @Autowired
-    public MessageHandler(SocketIOServer server) {
+    public UserHandler(SocketIOServer server) {
         this.server = server;
     }
 
@@ -30,18 +28,16 @@ public class MessageHandler {
      *
      * @param client
      * @param request
-     * @param messageDO
+     * @param userDO
      */
-    @OnEvent(value = "message")
-    public void onEvent(SocketIOClient client, AckRequest request, MessageDO messageDO) {
-        ClientDo clientDo = StoreBas.CLIENTS.get(messageDO.getToUser());
+    @OnEvent(value = "user")
+    public void onEvent(SocketIOClient client, AckRequest request, UserDO userDO) {
+        ClientDo clientDo = StoreBas.CLIENTS.get(userDO.getUserId());
         if (clientDo != null && clientDo.isOnline()) {
-            UUID target = clientDo.getSession();
+            UUID target = client.getSessionId();
             System.out.println("目标会话UUID:" + target);
             // 向当前会话发送信息
-            client.sendEvent("message", messageDO);
-            // 向目标会话发送信息
-            server.getClient(target).sendEvent("message", messageDO);
+            client.sendEvent("message", StoreBas.CLIENTS);
         }
     }
 
