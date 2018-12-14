@@ -20,6 +20,10 @@ public class SendMessageDO {
      */
     private String toUser;
 
+
+
+
+
     public String getMessage() {
         return message;
     }
