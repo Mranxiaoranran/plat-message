@@ -16,7 +16,7 @@ public class TestRedisClient {
 
     @Test
     public void testZAdd() {
-        String key = "INDEX";
+        String key = "1";
         String value = "123";
         Double a = 2.0;
         redisClient.zAdd(key, value, a);
