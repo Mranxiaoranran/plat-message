@@ -51,6 +51,14 @@
             <version>1.7.16</version>
         </dependency>
 
+        <!-- 引入fastjson   -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.4</version>
+        </dependency>
+
+
         <!-- 测试时期依赖包 -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>

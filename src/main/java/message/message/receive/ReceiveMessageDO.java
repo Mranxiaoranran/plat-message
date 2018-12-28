@@ -1,6 +1,7 @@
 package message.message.receive;
 
-import message.message.SendMessageDO;
+
+import message.message.send.SendMessageDO;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -31,14 +32,12 @@ public class ReceiveMessageDO implements Serializable {
     private Date receiveTime;
 
 
-    public ReceiveMessageDO() {
-
-    }
+    public ReceiveMessageDO() {}
 
     public ReceiveMessageDO(SendMessageDO sendMessageDO) {
         this.message = sendMessageDO.getMessage();
-        this.fromUser = sendMessageDO.getSendUser();
-        this.receiveUser = sendMessageDO.getToUser();
+        this.fromUser = sendMessageDO.getFromUser();
+        this.receiveUser = sendMessageDO.getReceiveUser();
     }
 
     public String getMessage() {

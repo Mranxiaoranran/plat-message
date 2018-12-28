@@ -1,25 +1,20 @@
 package message.session;
 
-import message.client.ClientDo;
-import message.user.UserDO;
+import message.client.ClientDO;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 public abstract class StoreBas {
     /**
-     * 客户信息与用户名之间的关系
+     * 业务参数clientId作为唯一key  value为一些基本信息
      */
-    public static final ConcurrentSkipListMap<String, ClientDo> CLIENTS = new ConcurrentSkipListMap<>();
+    public static final ConcurrentSkipListMap<String, ClientDO> CLIENTS = new ConcurrentSkipListMap<>();
 
     /**
-     * 客户与连接关系信息
+     * socket连接 UUID 作为唯一key  value为业务参数clientId
      */
     public static final ConcurrentSkipListMap<UUID, String> CONNECTIONS = new ConcurrentSkipListMap<>();
 
-    /**
-     * 客户信息
-     */
-    public static final Set<UserDO> USERS = new HashSet<>();
 
 }

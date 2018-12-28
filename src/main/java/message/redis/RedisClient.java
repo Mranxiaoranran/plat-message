@@ -39,6 +39,30 @@ public class RedisClient {
     }
 
 
+    /**
+     * 获取指定key 所有ZSET缓存
+     */
+    public Set<Object> zRange(String key) {
+        ZSetOperations<String, Object> zSetOperations = redisTemplate.opsForZSet();
+        Set<Object> range = zSetOperations.range(key, 0, -1);
+        return range;
+    }
+
+    /**
+     * @param key
+     */
+    public void zRem(String key) {
+        ZSetOperations<String, Object> zSetOperations = redisTemplate.opsForZSet();
+        zSetOperations.removeRange(key, 0, -1);
+    }
+
+
+    /**
+     * 发送订阅消息
+     *
+     * @param event
+     * @param json
+     */
     public void sendEvent(String event, String json) {
         redisTemplate.convertAndSend(event, json);
     }

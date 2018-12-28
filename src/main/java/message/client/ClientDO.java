@@ -6,11 +6,11 @@ import java.util.UUID;
 /**
  * 客户端存储信息
  */
-public class ClientDo {
+public class ClientDO {
     /**
      * 业务系统用户标识
      */
-    private String clientId;
+    private String userId;
     /**
      * 是否在线
      */
@@ -27,12 +27,12 @@ public class ClientDo {
     private UUID session;
 
 
-    public String getClientId() {
-        return clientId;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public boolean isOnline() {

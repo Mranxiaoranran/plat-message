@@ -2,7 +2,7 @@ package message.event;
 
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
-import message.client.ClientDo;
+import message.client.ClientDO;
 import message.session.StoreBas;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,7 +21,7 @@ public class EventHandler {
      * 发送事件
      */
     public void sendEvent(String userId) {
-        ClientDo clientDo = StoreBas.CLIENTS.get(userId);
+        ClientDO clientDo = StoreBas.CLIENTS.get(userId);
         SocketIOClient client = server.getClient(clientDo.getSession());
         client.sendEvent("event", userId);
     }
