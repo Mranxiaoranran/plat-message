@@ -11,11 +11,11 @@ public class SendMessageDO{
      */
     private String message;
 
-
     /**
      *  接收用户
      */
     private String   receiveUser;
+
 
     /**
      *  发送用户

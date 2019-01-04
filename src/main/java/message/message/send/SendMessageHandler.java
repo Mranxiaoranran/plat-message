@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 
 /**
- * 发送消息事件处理器
+ * 发送消息
  * <p>
  * 用户向消息服务器的 发送消息事件发起事件 ===》 用户是否在线
  */
@@ -25,10 +25,10 @@ public class SendMessageHandler {
     //netty服务器核心
     private SocketIOServer server;
 
-    @Autowired
+
     private ReceiveMessageHandler receiveMessageHandler;
 
-    @Autowired
+
     private RedisClient redisClient;
 
     @Autowired
@@ -52,7 +52,6 @@ public class SendMessageHandler {
                 //放置消息服务器中
                 StoreBas.CLIENTS.put(receiveUser,clientDo);
             }
-
             ReceiveMessageDO receiveMessageDO = new ReceiveMessageDO(sendMessageDO);
             //如果在线，直接发送消息
             if (clientDo.isOnline()) {

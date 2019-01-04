@@ -6,9 +6,6 @@ import com.corundumstudio.socketio.annotation.OnConnect;
 import com.corundumstudio.socketio.annotation.OnDisconnect;
 import io.netty.util.internal.StringUtil;
 import message.client.ClientDO;
-import message.message.receive.ReceiveMessageDO;
-import message.message.receive.ReceiveMessageHandler;
-import message.redis.RedisClient;
 import message.session.StoreBas;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,9 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class Connector {
@@ -28,19 +23,11 @@ public class Connector {
     //netty服务器核心
     private SocketIOServer server;
 
-    private RedisClient redisClient;
-
-    private ReceiveMessageHandler receiveMessageHandler;
-
-    //在线人数
-    private static AtomicInteger onlineCount = new AtomicInteger(0);
-
     @Autowired
-    public Connector(SocketIOServer server, RedisClient redisClient, ReceiveMessageHandler receiveMessageHandler) {
+    public Connector(SocketIOServer server) {
         this.server = server;
-        this.redisClient = redisClient;
-        this.receiveMessageHandler = receiveMessageHandler;
     }
+
 
     /**
      * connect事件处理，当客户端发起连接时将调用
@@ -49,11 +36,77 @@ public class Connector {
      */
     @OnConnect
     public void onConnect(SocketIOClient client) {
-        //业务上连接需要处理的问题
-        connect(client);
-        //拉取收件箱信息
-        inbox(client);
+        //获取连接的唯一标识,sid
+        UUID session = client.getSessionId();
+        if (null == session) {
+            log.error(" sid 不能为空，本次连接关闭 ");
+            client.disconnect();
+            return;
+        }
+        //业务用户标识
+        String userId = client.getHandshakeData().getSingleUrlParam("userId");
+        if (StringUtil.isNullOrEmpty(userId)) {
+            log.error("userId不能为空,本次连接关闭");
+            client.disconnect();
+            return;
+        }
+        //用户未在消息服务器登录过，即第一次登录
+        if (!StoreBas.CLIENTS.containsKey(userId)) {
+            ClientDO clientDO = new ClientDO();
+            //设置登录状态
+            clientDO.setOnline(true);
+            //设置连接sid
+            clientDO.setSession(session);
+            //设置最新登录时间
+            clientDO.setLastConnectedTime(new Date());
+            //将会话信息更新保存至集合中
+            StoreBas.CLIENTS.put(userId, clientDO);
+            //设置连接与用户标识双向列表
+            StoreBas.CONNECTIONS.put(session, userId);
+        } else {
+            ClientDO clientDo = StoreBas.CLIENTS.get(userId);
+            //特殊情况处理，虽然登录过，但是用户信息存在问题
+            if (null == clientDo) {
+                clientDo = new ClientDO();
+                //设置登录状态
+                clientDo.setOnline(true);
+                //设置连接sid
+                clientDo.setSession(session);
+                //设置最新登录时间
+                clientDo.setLastConnectedTime(new Date());
+                //将会话信息更新保存至集合中
+                StoreBas.CLIENTS.put(userId, clientDo);
+                //设置连接与用户标识双向列表
+                StoreBas.CONNECTIONS.put(session, userId);
+            } else {
+                //正常情况下,用户曾经连接过消息服务器,但是再一次登录，也分为两种情况
+                //同一个浏览器在不同个窗口打开
+                if (session.equals(clientDo.getSession())) {
+                    //设置登录状态
+                    clientDo.setOnline(true);
+                    //设置最新登录时间
+                    clientDo.setLastConnectedTime(new Date());
+                    //将会话信息更新保存至集合中
+                    StoreBas.CLIENTS.put(userId, clientDo);
+                } else {
+                    // 情况二  同一个用户是在不同的浏览器登录
+                    log.error("同一个用户是在不同的浏览器登录 用户userId是" + userId);
+                    //设置登录状态
+                    clientDo.setOnline(true);
+                    //设置连接sid
+                    clientDo.setSession(session);
+                    //设置最新登录时间
+                    clientDo.setLastConnectedTime(new Date());
+                    //将会话信息更新保存至集合中
+                    StoreBas.CLIENTS.put(userId, clientDo);
+                    //设置连接与用户标识双向列表
+                    StoreBas.CONNECTIONS.put(session, userId);
+                }
+            }
+        }
+        log.info("当前在线人数为" + StoreBas.CLIENTS.size());
     }
+
 
     /**
      * disconnect事件处理，当客户端断开连接时将调用
@@ -62,6 +115,7 @@ public class Connector {
      */
     @OnDisconnect
     public void onDisconnect(SocketIOClient client) {
+
         String clientId = client.getHandshakeData().getSingleUrlParam("userId");
         UUID session = client.getSessionId();
         //通过非业务方法断开连接
@@ -73,61 +127,12 @@ public class Connector {
                 StoreBas.CONNECTIONS.remove(session);
                 //通过业务方法断开连接
                 StoreBas.CLIENTS.remove(clientId);
-                //在线数减1
-                log.info("socket 断开连接、sessionId:" + client.getSessionId() + "、userId:" + clientId + "、当前连接数：" + onlineCount.decrementAndGet());
             }
         } else {
             //通过业务方法断开连接
             StoreBas.CLIENTS.remove(clientId);
-            //在线数减1
-            log.info("socket 断开连接、sessionId:" + client.getSessionId() + "、userId:" + clientId + "、当前连接数：" + onlineCount.decrementAndGet());
         }
+        log.info("当前在线人数为" + StoreBas.CLIENTS.size());
     }
 
-    /**
-     * 业务相关连接处理
-     *
-     * @param client
-     */
-    protected void connect(SocketIOClient client) {
-        //获取连接的唯一标识
-        UUID session = client.getSessionId();
-        //业务用户标识
-        String userId = client.getHandshakeData().getSingleUrlParam("userId");
-        //用户信息
-        ClientDO clientDo = StoreBas.CLIENTS.get(userId);
-        // 如果没有连接信息、则新建会话信息
-        if (clientDo == null) {
-            clientDo = new ClientDO();
-            //设置在线
-            clientDo.setOnline(true);
-            //在线数加1
-            log.info("socket 建立新连接、sessionId:" + session + "、userId:" + userId + "、当前连接数：" + onlineCount.incrementAndGet());
-        } else {
-            log.info(" socket连接回复: " + userId);
-        }
-        // 更新设置客户端连接信息
-        clientDo.setSession(session);
-        clientDo.setLastConnectedTime(new Date());
-        //将会话信息更新保存至集合中
-        StoreBas.CLIENTS.put(userId, clientDo);
-        StoreBas.CONNECTIONS.put(session, userId);
-    }
-
-    protected void inbox(SocketIOClient client) {
-        //业务用户标识
-        String clientId = client.getHandshakeData().getSingleUrlParam("userId");
-        //拉取收件箱信息
-        Set<Object> inbox = redisClient.zRange(clientId);
-        if (!inbox.isEmpty()) {
-            for (Object obj : inbox) {
-                if (null == obj) {
-                    ReceiveMessageDO receiveMessageDO = (ReceiveMessageDO) obj;
-                    receiveMessageHandler.receiveMessage(receiveMessageDO);
-                }
-            }
-            //将收件箱清空
-            redisClient.zRem(clientId);
-        }
-    }
 }

@@ -11,6 +11,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
+/**
+ * 接收消息
+ */
 @Component
 public class ReceiveMessageHandler {
 
