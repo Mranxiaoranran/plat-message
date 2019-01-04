@@ -5,10 +5,13 @@ import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.annotation.OnEvent;
 import io.netty.util.internal.StringUtil;
 import message.client.ClientDO;
+import message.connector.Connector;
 import message.message.receive.ReceiveMessageDO;
 import message.message.receive.ReceiveMessageHandler;
 import message.redis.RedisClient;
 import message.session.StoreBas;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +34,7 @@ public class SendMessageHandler {
 
     private RedisClient redisClient;
 
+    private static final Logger log = LoggerFactory.getLogger(SendMessageHandler.class);
     @Autowired
     public SendMessageHandler(SocketIOServer server, ReceiveMessageHandler receiveMessageHandler, RedisClient redisClient) {
         this.server = server;
@@ -56,6 +60,7 @@ public class SendMessageHandler {
             //如果在线，直接发送消息
             if (clientDo.isOnline()) {
                 receiveMessageHandler.receiveMessage(receiveMessageDO);
+                log.info("用户" + receiveMessageDO.getFromUser() + "向用户" + receiveMessageDO.getReceiveUser() +  "发送消息" +  receiveMessageDO.getMessage());
             } else {
                 //不在线，放入用户收件箱
                 String key = new StringBuffer("INBOX:").append(receiveMessageDO.getReceiveUser()).toString();
@@ -65,6 +70,8 @@ public class SendMessageHandler {
                 Long score = new Date().getTime();
                 //放入收件箱
                 redisClient.zAdd(key, value, score);
+                //日志
+                log.info("用户" + receiveMessageDO.getReceiveUser() + "不在线，收件箱新增一条消息");
             }
         }
     }

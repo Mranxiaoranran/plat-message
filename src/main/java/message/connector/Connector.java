@@ -63,6 +63,7 @@ public class Connector {
             StoreBas.CLIENTS.put(userId, clientDO);
             //设置连接与用户标识双向列表
             StoreBas.CONNECTIONS.put(session, userId);
+            log.info("用户未在消息服务器登录过，即第一次登录 userId为" +userId);
         } else {
             ClientDO clientDo = StoreBas.CLIENTS.get(userId);
             //特殊情况处理，虽然登录过，但是用户信息存在问题
@@ -88,6 +89,7 @@ public class Connector {
                     clientDo.setLastConnectedTime(new Date());
                     //将会话信息更新保存至集合中
                     StoreBas.CLIENTS.put(userId, clientDo);
+                    log.info("同一个浏览器在不同个窗口打开 userId为" +userId);
                 } else {
                     // 情况二  同一个用户是在不同的浏览器登录
                     log.error("同一个用户是在不同的浏览器登录 用户userId是" + userId);
