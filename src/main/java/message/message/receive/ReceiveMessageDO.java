@@ -20,7 +20,6 @@ public class ReceiveMessageDO implements Serializable {
      * 消息发送用户信息
      */
     private String fromUser;
-
     /**
      * 接收用户信息
      */
@@ -31,13 +30,21 @@ public class ReceiveMessageDO implements Serializable {
      */
     private Date receiveTime;
 
+    /**
+     * 发送消息用户的昵称
+     */
+    private String fromNickName;
 
-    public ReceiveMessageDO() {}
+
+    public ReceiveMessageDO() {
+    }
 
     public ReceiveMessageDO(SendMessageDO sendMessageDO) {
         this.message = sendMessageDO.getMessage();
         this.fromUser = sendMessageDO.getFromUser();
         this.receiveUser = sendMessageDO.getReceiveUser();
+        this.fromNickName = sendMessageDO.getFromNickName();
+        this.receiveTime = new Date();
     }
 
     public String getMessage() {
@@ -70,5 +77,14 @@ public class ReceiveMessageDO implements Serializable {
 
     public void setReceiveTime(Date receiveTime) {
         this.receiveTime = receiveTime;
+    }
+
+
+    public String getFromNickName() {
+        return fromNickName;
+    }
+
+    public void setFromNickName(String fromNickName) {
+        this.fromNickName = fromNickName;
     }
 }

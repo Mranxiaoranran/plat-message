@@ -28,6 +28,10 @@ public class SendMessageDO{
      */
     private Date sendTime;
 
+    /**
+     * 发送消息用户的昵称
+     */
+    private String  fromNickName;
 
     public String getReceiveUser() {
         return receiveUser;
@@ -59,5 +63,13 @@ public class SendMessageDO{
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getFromNickName() {
+        return fromNickName;
+    }
+
+    public void setFromNickName(String fromNickName) {
+        this.fromNickName = fromNickName;
     }
 }

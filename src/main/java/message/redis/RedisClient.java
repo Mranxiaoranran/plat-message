@@ -49,6 +49,7 @@ public class RedisClient {
     }
 
     /**
+     * 删除指定key  zset存储
      * @param key
      */
     public void zRem(String key) {

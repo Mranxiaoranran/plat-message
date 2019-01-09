@@ -114,6 +114,7 @@ public class Connector {
             }
         }
         log.info("用户" + userId + "登录成功当前在线人数为" + StoreBas.CLIENTS.size());
+        log.info("所有连接数量" +  server.getAllClients().size());
     }
 
 
@@ -129,8 +130,12 @@ public class Connector {
          * 只处理通过业务方式连接消息服务器的请求
          */
         if (!StringUtil.isNullOrEmpty(userId)){
+            StoreBas.CLIENTS.remove(userId);
             log.info("用户" + userId + "退出登录" + "当前在线人数为" + StoreBas.CLIENTS.size());
+        }else{
+            log.info("用户" + userId + "非正常方式退出登录" );
         }
+        log.info("所有连接数量" +  server.getAllClients().size());
     }
 
 }
