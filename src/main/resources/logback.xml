@@ -120,7 +120,7 @@
 
 
     <!-- Logger 根目录 -->
-    <root level="ERROR">
+    <root level="DEBUG">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="DEBUG" />
         <appender-ref ref="ERROR" />
@@ -128,4 +128,6 @@
         <appender-ref ref="INFO" />
         <appender-ref ref="TRACE" />
     </root>
+
+
 </configuration>
